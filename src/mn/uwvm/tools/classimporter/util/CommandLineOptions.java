@@ -13,6 +13,7 @@ public final class CommandLineOptions extends Options {
     public static final String DRY_RUN = "dry-run";
     public static final String HELP = "help";
     public static final String FILTER = "filter";
+    public static final String EXCLUDE_RULE = "exclude-rule";
     
     private CommandLineOptions() {}
     
@@ -48,6 +49,9 @@ public final class CommandLineOptions extends Options {
                 "f", FILTER, true,
                 "provide source code filter which implements " + FileFilter.class.getCanonicalName() +
                 " as its service. this filter is loaded dynamically.");
+        }
+        { // exclude-rule
+            options.addOption("e", EXCLUDE_RULE, true, "provide exclude pattern file.");
         }
         
         return options;

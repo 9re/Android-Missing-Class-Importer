@@ -27,6 +27,7 @@ import javax.tools.ToolProvider;
 import mn.uwvm.tools.classimporter.filter.FileFilter;
 import mn.uwvm.tools.classimporter.util.AndroidProjectWalker;
 import mn.uwvm.tools.classimporter.util.CommandLineOptions;
+import mn.uwvm.tools.classimporter.util.ExcludePatterns;
 import mn.uwvm.tools.classimporter.util.FileFilterFactory;
 
 import org.apache.commons.cli.CommandLine;
@@ -64,6 +65,7 @@ public class ClassImporter {
         final boolean verbose;
         final boolean dryRun;
         FileFilter fileFilter = null;
+        ExcludePatterns excludePatterns = null;
         {
             CommandLineOptions commandLineOptions = CommandLineOptions.newInstance();
             /* options */
@@ -86,6 +88,9 @@ public class ClassImporter {
                     fileFilter = FileFilterFactory.newInstance(classLoader);
                     System.out.println("fileFilter: " + fileFilter);
                 }
+                if (cmd.hasOption(CommandLineOptions.EXCLUDE_RULE)) {
+                    excludePatterns = new ExcludePatterns(cmd.getOptionValue(CommandLineOptions.EXCLUDE_RULE));
+                }
             } catch (ParseException e) {
                 System.err.println(e.getMessage());
                 printUsage(commandLineOptions);
@@ -102,6 +107,10 @@ public class ClassImporter {
             if (!sourceProjectRoot.exists() || !sourceProjectRoot.isDirectory()) {
                 System.err.println("source project dir " + sourceProjectRoot.getAbsolutePath() + " does not exists!");
                 return;
+            }
+            
+            if (excludePatterns == null) {
+                excludePatterns = new ExcludePatterns();
             }
         }
         
@@ -174,7 +183,16 @@ public class ClassImporter {
             if (!targetSourceMap.containsKey(missing) &&// to avoid override copy
                 sourceSourceMap.containsKey(missing)) {
                 File sourceFile = sourceSourceMap.get(missing);
-                fileFilter.copy(sourceFile, sourceProjectRoot, targetProjectRoot, dryRun);
+                String fqn =
+                    sourceFile
+                        .getAbsolutePath()
+                        .replace(sourceProjectRoot.getAbsolutePath() + "/src/", "")
+                        .replace(".java", "")
+                        .replace('/', '.');
+                if (!excludePatterns.shouldExclude(fqn)) {
+                    System.out.println("fqn: " + fqn);
+                    fileFilter.copy(sourceFile, sourceProjectRoot, targetProjectRoot, dryRun);
+                }
             }
         }
         
