@@ -19,7 +19,7 @@
 
   <!-- cleans out the intermediate build files -->
   <target name="clean" description="Cleans out build results.">
-    <delete dir="out"/>
+    <delete dir="${out.dir}"/>
   </target>
 
   <target name="compile" depends="prepare" description="Compiles the code.">
