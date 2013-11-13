@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<project name="missing-class-importer" default="compile" basedir=".">
+  
+  <!-- various directories used when building things -->
+  <loadfile property="version" srcFile="VERSION"/>
+  <property name="src.dir" value="src"/>
+  <property name="out.dir" value="out"/>
+
+  <!-- read in the desired configuration local configuration -->
+  <property file="build.properties"/>
+  <!-- if build.properties does not specify javac.home we provide a default -->
+  <property name="javac.home"  value="${java.home}/.."/>
+
+  <!-- prepares the application directories -->
+  <target name="prepare">
+    <mkdir dir="${out.dir}/classes"/>
+    <mkdir dir="${out.dir}/META-INF/services"/>
+  </target>
+
+  <!-- cleans out the intermediate build files -->
+  <target name="clean" description="Cleans out build results.">
+    <delete dir="out"/>
+  </target>
+
+  <target name="compile" depends="prepare" description="Compiles the code.">
+    <javac fork="no" executable="${javac.home}/bin/javac" debug="on"
+           source="1.6" target="1.6" encoding="utf-8"
+           srcdir="${src.dir}" destdir="${out.dir}/classes">
+      <classpath>
+        <fileset dir="libs" includes="*.jar"/>
+      </classpath>
+      <compilerarg value="-Xlint"/>
+      <compilerarg value="-Xlint:-serial"/>
+    </javac>
+    <!-- prepare META-INF -->
+    <copy file="LICENSE.txt" todir="${out.dir}/META-INF" />
+    <copy todir="${out.dir}/META-INF/services">
+      <fileset dir="services" includes="*"/>
+    </copy>
+    <!-- prepare META-INF -->
+    <jar destfile="${out.dir}/class-importer-filter-${version}.jar">
+      <fileset dir="${out.dir}/classes" includes="mn/uwvm/tools/classimporter/command/Command.class"/>
+      <fileset dir="${out.dir}/classes" includes="mn/uwvm/tools/classimporter/command/CopyCommand.class"/>
+      <fileset dir="${out.dir}/classes" includes="mn/uwvm/tools/classimporter/filter/FileFilter.class"/>
+      <zipgroupfileset dir="libs" includes="commons-io-*"/>
+      <zipgroupfileset dir="libs" includes="commons-lang3-*"/>
+    </jar>
+    <jar destfile="${out.dir}/missing-class-importer-${version}.jar"
+         filesetmanifest="skip">
+      <fileset dir="${out.dir}" includes="META-INF/**"/>
+      <fileset dir="${out.dir}/classes" />
+      <zipgroupfileset dir="libs" includes="*.jar"/>
+    </jar>
+  </target>
+
+</project>
