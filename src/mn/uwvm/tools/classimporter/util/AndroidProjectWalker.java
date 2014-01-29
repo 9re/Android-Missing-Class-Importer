@@ -81,12 +81,16 @@ public class AndroidProjectWalker {
     }
     
     private List<File> listJarFiles() {
-        return Arrays.asList(new File(mPath, "libs").listFiles(new FilenameFilter(){
+        File[] files = new File(mPath, "libs").listFiles(new FilenameFilter(){
             @Override
             public boolean accept(File dir, String name) {
                 return name.endsWith(".jar");
             }
-        }));
+            });
+        if (files == null) {
+            files = new File[0];
+        }
+        return Arrays.asList(files);
     }
     
     public List<File> getJarFiles() {
