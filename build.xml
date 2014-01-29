@@ -12,7 +12,7 @@
   <property name="javac.home"  value="${java.home}/.."/>
 
   <!-- prepares the application directories -->
-  <target name="prepare">
+  <target name="prepare" depends="clean">
     <mkdir dir="${out.dir}/classes"/>
     <mkdir dir="${out.dir}/META-INF/services"/>
   </target>
